@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Knot</string>
+    <string-array name="spinner_options">
+        <item>Nunca</item>
+        <item>Única vez</item>
+        <item>Hora em hora</item>
+        <item>Diário</item>
+        <item>Semanal</item>
+        <item>Mensal</item>
+    </string-array>
+    <string name="confirmDeletion">Confirmar exclusão?</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+</resources>
