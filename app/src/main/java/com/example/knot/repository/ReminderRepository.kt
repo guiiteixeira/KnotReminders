@@ -1,73 +1,47 @@
 package com.example.knot.repository
 
-import com.example.knot.model.Frequency
+import android.content.Context
+import android.os.AsyncTask
+import com.example.knot.db.AppDatabase
+import com.example.knot.db.Database
 import com.example.knot.model.Reminder
+import com.example.knot.tasks.DeleteReminderTask
+import com.example.knot.tasks.InsertReminderTask
+import com.example.knot.tasks.UpdateReminderTask
 import java.io.Serializable
-import java.util.*
 import kotlin.collections.ArrayList
 
-class ReminderRepository: Serializable {
+class ReminderRepository(var context: Context): Serializable {
 
-    companion object{
-        var reminders: ArrayList<Reminder> = ArrayList()
-        var index: Long = 2
-    }
+    val db: AppDatabase
 
-    constructor(){
-        reminders.add(Reminder(
-            1,
-            "Example",
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been " +
-                    "the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of " +
-                    "type and scrambled it to make a type specimen book. ",
-            Date(),
-            Frequency.HORA_EM_HORA,
-            Date()
-        ))
+    init {
+        db = Database.getDatabase(context) as AppDatabase
     }
 
     fun addReminder(reminder: Reminder){
-        reminder.id = index
-        index += 1
-        reminders.add(reminder)
+        InsertReminderTask(db,reminder).execute()
     }
 
     fun deleteReminder(reminder: Reminder){
-        reminders.remove(reminder)
-    }
-
-    fun listAll(): ArrayList<Reminder> {
-        return reminders
+        DeleteReminderTask(db,reminder).execute()
     }
 
     fun getById(reminderId: Long): Reminder?{
-        for(item: Reminder in reminders){
-            if(reminderId == item.id){
-                return item
-            }
-        }
-        return null
+        return db.reminderDAO().getById(reminderId)
     }
 
     fun getByIndex(index: Int): Reminder?{
-        if(reminders.size <= index || 0 > index){
-            return null;
-        }else{
-            return reminders.get(index)
-        }
+        var reminders: List<Reminder> = db.reminderDAO().getAll()
+        return reminders.get(index)
     }
 
     fun getItemCount(): Int{
+        var reminders: List<Reminder> = db.reminderDAO().getAll()
         return reminders.size
     }
 
     fun updateReminder(reminder: Reminder){
-        for((index,value) in reminders.withIndex()){
-            if(value.id == reminder.id){
-                reminders.set(index,reminder)
-                return
-            }
-        }
+        UpdateReminderTask(db,reminder).execute()
     }
 }

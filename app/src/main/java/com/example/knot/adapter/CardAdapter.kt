@@ -13,17 +13,26 @@ import com.example.knot.R
 import com.example.knot.ReminderActivity
 import com.example.knot.model.Reminder
 import com.example.knot.repository.ReminderRepository
+import com.example.knot.tasks.BindViewHolderTask
 import java.text.SimpleDateFormat
 
 class CardAdapter(reminderRepository: ReminderRepository, onReminderListener: CardViewHolder.OnReminderListener): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     var reminderRepository: ReminderRepository
     var onReminderListener: CardViewHolder.OnReminderListener
+    var count: Int = 0
 
 
     init{
         this.reminderRepository = reminderRepository
         this.onReminderListener = onReminderListener
+
+        Thread(Runnable {
+            while(true){
+                count = reminderRepository.getItemCount()
+                Thread.sleep(500)
+            }
+        }).start()
     }
 
     class CardViewHolder(view: View, onReminderListener: OnReminderListener): RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -62,18 +71,11 @@ class CardAdapter(reminderRepository: ReminderRepository, onReminderListener: Ca
     }
 
     override fun getItemCount(): Int {
-        return this.reminderRepository.getItemCount()
+        return count;
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        var reminder: Reminder = reminderRepository.getByIndex(position) as Reminder
-
-        holder.id = reminder.id
-
-        holder.title.setText(reminder.title)
-        var formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
-        holder.date.setText(formatter.format(reminder.firstAlertDate))
-        holder.resume.setText(reminder.resume)
+        BindViewHolderTask(reminderRepository,holder, position).execute()
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

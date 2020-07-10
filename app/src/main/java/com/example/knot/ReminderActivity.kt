@@ -1,9 +1,15 @@
 package com.example.knot
 
+import android.annotation.TargetApi
+import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
+import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -16,11 +22,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.knot.model.Frequency
 import com.example.knot.model.Reminder
 import com.example.knot.repository.ReminderRepository
+import com.example.knot.tasks.FillEditScreenTask
+import com.example.knot.tasks.alarm.AlarmReceiver
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import java.text.ParseException
+import com.google.gson.Gson
+import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
+import java.text.ParseException
 
 
 class ReminderActivity : AppCompatActivity() {
@@ -31,6 +41,7 @@ class ReminderActivity : AppCompatActivity() {
     lateinit var description: EditText
     lateinit var resume: EditText
     var editar: Boolean = false
+    var hadFrequency: Boolean = false
     lateinit var reminder: Reminder
     lateinit var reminderRePository: ReminderRepository
     lateinit var dateFormatted: String
@@ -43,12 +54,13 @@ class ReminderActivity : AppCompatActivity() {
 
         title = findViewById(R.id.title)
         date = findViewById(R.id.date)
-        frequency = findViewById(R.id.spinner)
+        frequency = findViewById(R.id.spinner) as Spinner
         description = findViewById(R.id.description)
         resume = findViewById(R.id.resume)
 
-        var id = intent.extras?.getSerializable("reminder") as Long?
-        this.reminderRePository = intent.extras?.getSerializable("repository") as ReminderRepository
+        reminderRePository = ReminderRepository(this)
+        var index = intent.extras?.getSerializable("reminder") as Int?
+
 
         ArrayAdapter.createFromResource(this, R.array.spinner_options, android.R.layout.simple_spinner_item)
             .also { adapter ->
@@ -56,9 +68,12 @@ class ReminderActivity : AppCompatActivity() {
                 frequency.adapter = adapter
             }
 
-        if(id != null) {
-            fillReminderToEdit(id)
-            setFrequency()
+        if(index != null) {
+            fillReminderToEdit(index)
+            Thread(Runnable {
+                this.reminder = reminderRePository.getByIndex(index) as Reminder
+                if(reminder.frequency != Frequency.NUNCA) hadFrequency = true
+            }).start()
         }
 
         date.setOnFocusChangeListener(OnFocusChangeListener { view, hasFocus ->
@@ -66,48 +81,14 @@ class ReminderActivity : AppCompatActivity() {
                 onDateFocus(view)
             }
         })
+
+
     }
 
-    fun setFrequency(){
-
-        when(reminder.frequency){
-            Frequency.NUNCA -> {
-                frequency.setSelection(0)
-                true
-            }
-            Frequency.UNICA_VEZ -> {
-                frequency.setSelection(1)
-                true
-            }
-            Frequency.HORA_EM_HORA -> {
-                frequency.setSelection(2)
-                true
-            }
-            Frequency.DIARIO -> {
-                frequency.setSelection(3)
-                true
-            }
-            Frequency.SEMANAL -> {
-                frequency.setSelection(4)
-                true
-            }
-            Frequency.MENSAL -> {
-                frequency.setSelection(5)
-                true
-            }
-        }
-    }
-
-    fun fillReminderToEdit(id: Long){
+    fun fillReminderToEdit(index: Int){
         editar = true
-        this.reminder = reminderRePository.getById(id) as Reminder
-        title.setText(reminder.title)
 
-        var formater = SimpleDateFormat("dd/MM/yyyy HH:mm")
-        date.setText(formater.format(reminder.firstAlertDate))
-
-        description.setText(reminder.description)
-        resume.setText(reminder.resume)
+        FillEditScreenTask(reminderRePository,title,date,frequency,description,resume, index).execute()
 
         title.isEnabled = false
         date.isEnabled = false
@@ -125,6 +106,9 @@ class ReminderActivity : AppCompatActivity() {
 
     fun removerReminder(){
         if(editar){
+            if(hadFrequency){
+                cancelaAlarme()
+            }
             this.reminderRePository.deleteReminder(this.reminder)
             finish()
         }
@@ -235,10 +219,89 @@ class ReminderActivity : AppCompatActivity() {
         getReminder()
         if(editar){
             this.reminderRePository.updateReminder(reminder)
+            if(hadFrequency){
+                cancelaAlarme()
+            }
+            if(reminder.frequency != Frequency.NUNCA){
+                criaAlarme()
+            }
         }else{
             this.reminderRePository.addReminder(reminder)
+            if(reminder.frequency != Frequency.NUNCA){
+                criaAlarme()
+            }
         }
         finish()
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    fun criaAlarme(){
+        var cal: Calendar = Calendar.getInstance()
+        cal.time = reminder.firstAlertDate
+
+        val alarmManager =
+            getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        var notificationIntent = Intent(this, AlarmReceiver::class.java)
+
+        var gson: Gson = Gson()
+
+        notificationIntent.action = reminder.id.toString()
+        notificationIntent.putExtra("reminder",gson.toJson(reminder))
+
+        var pendingIntent: PendingIntent = PendingIntent.getBroadcast(applicationContext,1,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT)
+
+        when(reminder.frequency){
+            Frequency.UNICA_VEZ -> {
+                alarmManager?.setExact(AlarmManager.RTC_WAKEUP,cal.timeInMillis,pendingIntent)
+            }
+            Frequency.HORA_EM_HORA -> {
+                alarmManager?.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.timeInMillis,
+                    AlarmManager.INTERVAL_HOUR,
+                    pendingIntent
+                )
+            }
+            Frequency.DIARIO -> {
+                alarmManager?.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.timeInMillis,
+                    AlarmManager.INTERVAL_DAY,
+                    pendingIntent
+                )
+            }
+            Frequency.SEMANAL -> {
+                alarmManager?.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.timeInMillis,
+                    AlarmManager.INTERVAL_DAY * 7,
+                    pendingIntent
+                )
+            }
+            Frequency.MENSAL -> {
+                alarmManager?.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.timeInMillis,
+                    AlarmManager.INTERVAL_DAY * 30,
+                    pendingIntent
+                )
+            }
+        }
+
+    }
+
+    fun cancelaAlarme(){
+        val alarmManager =
+            getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        var notificationIntent = Intent(this, AlarmReceiver::class.java)
+
+        var gson: Gson = Gson()
+
+        notificationIntent.action = reminder.id.toString()
+        notificationIntent.putExtra("reminder",gson.toJson(reminder))
+
+        var pendingIntent: PendingIntent = PendingIntent.getBroadcast(applicationContext,1,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT)
+        alarmManager?.cancel(pendingIntent)
     }
 
     fun onDateFocus(view: View){

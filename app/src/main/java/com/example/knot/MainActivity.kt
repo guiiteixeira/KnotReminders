@@ -15,16 +15,13 @@ import com.example.knot.repository.ReminderRepository
 class MainActivity : AppCompatActivity(), CardAdapter.CardViewHolder.OnReminderListener {
 
     lateinit var recyclerView: RecyclerView
-    var repository: ReminderRepository
-
-    init {
-        this.repository = ReminderRepository()
-    }
+    lateinit var repository: ReminderRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.knot.R.layout.activity_main)
 
+        repository = ReminderRepository(this)
         recyclerView = findViewById(com.example.knot.R.id.recyclerview) as RecyclerView
     }
 
@@ -38,8 +35,7 @@ class MainActivity : AppCompatActivity(), CardAdapter.CardViewHolder.OnReminderL
 
     override fun onReminderClick(position: Int) {
         var bundle = Bundle()
-        bundle.putSerializable("reminder", repository.getByIndex(position)?.id)
-        bundle.putSerializable("repository", repository)
+        bundle.putSerializable("reminder", position)
 
         var intent = Intent(this, ReminderActivity::class.java).apply {
             putExtras(bundle)
@@ -56,7 +52,6 @@ class MainActivity : AppCompatActivity(), CardAdapter.CardViewHolder.OnReminderL
         return when (item.getItemId()) {
             com.example.knot.R.id.addReminderBtn -> {
                 var bundle = Bundle()
-                bundle.putSerializable("repository", repository)
 
                 var intent = Intent(this, ReminderActivity::class.java).apply {
                     putExtras(bundle)
