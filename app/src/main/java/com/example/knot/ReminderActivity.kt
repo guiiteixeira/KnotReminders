@@ -1,11 +1,8 @@
 package com.example.knot
 
 import android.annotation.TargetApi
-import android.app.AlarmManager
-import android.app.DatePickerDialog
+import android.app.*
 import android.app.DatePickerDialog.OnDateSetListener
-import android.app.PendingIntent
-import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
 import android.content.Context
 import android.content.Intent
@@ -19,11 +16,13 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.JobIntentService.enqueueWork
 import com.example.knot.model.Frequency
 import com.example.knot.model.Reminder
 import com.example.knot.repository.ReminderRepository
 import com.example.knot.tasks.FillEditScreenTask
 import com.example.knot.tasks.alarm.AlarmReceiver
+import com.example.knot.tasks.alarm.NotificationIntentService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
@@ -234,59 +233,17 @@ class ReminderActivity : AppCompatActivity() {
         finish()
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
+
     fun criaAlarme(){
-        var cal: Calendar = Calendar.getInstance()
-        cal.time = reminder.firstAlertDate
 
-        val alarmManager =
-            getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        var notificationIntent = Intent(this, AlarmReceiver::class.java)
+        var bundle: Bundle = Bundle()
+        bundle.putSerializable("reminder",reminder)
 
-        var gson: Gson = Gson()
-
-        notificationIntent.action = reminder.id.toString()
-        notificationIntent.putExtra("reminder",gson.toJson(reminder))
-
-        var pendingIntent: PendingIntent = PendingIntent.getBroadcast(applicationContext,1,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT)
-
-        when(reminder.frequency){
-            Frequency.UNICA_VEZ -> {
-                alarmManager?.setExact(AlarmManager.RTC_WAKEUP,cal.timeInMillis,pendingIntent)
-            }
-            Frequency.HORA_EM_HORA -> {
-                alarmManager?.setInexactRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    cal.timeInMillis,
-                    AlarmManager.INTERVAL_HOUR,
-                    pendingIntent
-                )
-            }
-            Frequency.DIARIO -> {
-                alarmManager?.setInexactRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    cal.timeInMillis,
-                    AlarmManager.INTERVAL_DAY,
-                    pendingIntent
-                )
-            }
-            Frequency.SEMANAL -> {
-                alarmManager?.setInexactRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    cal.timeInMillis,
-                    AlarmManager.INTERVAL_DAY * 7,
-                    pendingIntent
-                )
-            }
-            Frequency.MENSAL -> {
-                alarmManager?.setInexactRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    cal.timeInMillis,
-                    AlarmManager.INTERVAL_DAY * 30,
-                    pendingIntent
-                )
-            }
+        var intent: Intent = Intent(applicationContext,NotificationIntentService::class.java).apply {
+            putExtras(bundle)
         }
+
+        startService(intent)
 
     }
 

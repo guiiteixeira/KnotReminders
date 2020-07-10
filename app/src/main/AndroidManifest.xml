@@ -23,6 +23,8 @@
 
         <receiver android:name=".tasks.alarm.AlarmReceiver">
         </receiver>
+
+        <service android:name=".tasks.alarm.NotificationIntentService" android:exported="false"/>
     </application>
 
 </manifest>
