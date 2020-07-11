@@ -250,7 +250,7 @@ class ReminderActivity : AppCompatActivity() {
     fun cancelaAlarme(){
         val alarmManager =
             getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        var notificationIntent = Intent(this, AlarmReceiver::class.java)
+        var notificationIntent = Intent(applicationContext, AlarmReceiver::class.java)
 
         var gson: Gson = Gson()
 

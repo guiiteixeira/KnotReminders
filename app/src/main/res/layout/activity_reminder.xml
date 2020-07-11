@@ -11,47 +11,67 @@
         >
 
         <Spinner
-                android:layout_width="395dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinner" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp" app:layout_constraintHorizontal_bias="0.0" android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/date"
-                android:textColor="@drawable/edit_text_selector"/>
-        <EditText
+                android:id="@+id/spinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:ems="10"
-                android:id="@+id/date"
-                android:layout_marginStart="8dp"
-                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" android:layout_marginTop="8dp"
-                android:hint="dd/mm/yyyy hh:mm"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
                 android:textColor="@drawable/edit_text_selector"
-                android:selectAllOnFocus="false" android:onClick="onDateFocus"/>
-        <Button
-                android:text="Salvar"
-                android:layout_width="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/date" />
+
+        <EditText
+                android:id="@+id/date"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/button" android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@+id/resume" app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
-                android:background="@color/colorPrimaryDark"
-                android:textColor="@color/design_default_color_on_primary" android:onClick="onSaveClick"/>
-        <ImageView
-                android:src="@drawable/reminder"
-                android:layout_width="414dp"
-                android:layout_height="404dp"
-                android:id="@+id/imageView"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:ems="10"
+                android:hint="dd/mm/yyyy hh:mm"
+                android:inputType="textPersonName"
+                android:onClick="onDateFocus"
+                android:selectAllOnFocus="false"
+                android:textColor="@drawable/edit_text_selector"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintHorizontal_bias="0.526"
-                app:layout_constraintTop_toBottomOf="@+id/spinner"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+        <Button
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:background="@color/colorPrimaryDark"
+                android:onClick="onSaveClick"
+                android:text="Salvar"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/resume" />
+
+        <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="398dp"
+                android:layout_height="393dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
                 android:layout_marginTop="8dp"
-        />
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/reminder"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.526"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spinner" />
         <TextView
                 android:text="Descrição"
                 android:layout_width="wrap_content"
@@ -75,32 +95,45 @@
                 android:gravity="top"
                 android:textColor="@drawable/edit_text_selector"
                 android:layout_marginRight="35dp" android:layout_marginEnd="35dp"/>
+
         <EditText
+                android:id="@+id/resume"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
                 android:ems="10"
-                android:id="@+id/resume" android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/imageView" android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
+                android:hint="Resumo"
+                android:inputType="textPersonName"
                 android:textColor="@drawable/edit_text_selector"
-                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp" android:hint="Resumo"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
         <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="395dp"
+                android:id="@+id/textInputLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp" android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
-                app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="16dp"
-                app:layout_constraintTop_toTopOf="parent" android:id="@+id/textInputLayout">
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Título" android:id="@+id/title"
+                    android:hint="Título"
                     android:textColor="@drawable/edit_text_selector"
 
-            />
+                    />
         </com.google.android.material.textfield.TextInputLayout>
         <Button
                 android:text="Cancelar"
